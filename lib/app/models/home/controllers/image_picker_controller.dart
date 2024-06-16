@@ -58,22 +58,40 @@ class ImagePickerController extends GetxController {
       return null;
     }
   }
+
   Future<void> saveSelectedImagesToHive() async {
     final box = await Hive.openBox<String>('selectedImagesBox');
     for (var index in selectedIndexes) {
       await box.add(imagePaths[index]);
     }
+    Get.snackbar('Success', 'Selected images saved to Hive');
   }
 
   Future<void> saveImagePath(String path) async {
     final box = await Hive.openBox<String>('imagePathsBox');
-    await box.add(path);
+    if (await File(path).exists()) {
+      await box.add(path);
+    }
   }
 
   Future<void> loadImagePaths() async {
     final box = await Hive.openBox<String>('imagePathsBox');
-    imagePaths.addAll(box.values);
+    final validPaths = box.values.where((path) => File(path).existsSync()).toList();
+    imagePaths.addAll(validPaths);
   }
+
+  void deleteSelectdItems()  {
+    selectedIndexes.forEach((index){
+        final file = File(imagePaths[index]);
+      if (file.existsSync()) {
+        file.deleteSync();
+    }
+    });
+    imagePaths.removeWhere(
+        (path) => selectedIndexes.contains(imagePaths.indexOf(path)));
+    selectedIndexes.clear();
+  }
+  
 
   @override
   void onInit() {

@@ -11,6 +11,7 @@ class HomeView extends GetView<HomeController> {
 
   final ImagePickerController imagePickerController =
       Get.put(ImagePickerController());
+  // final HomeController homeController = Get.put(HomeController());
 
   @override
   Widget build(BuildContext context) {
@@ -20,8 +21,22 @@ class HomeView extends GetView<HomeController> {
           'CamShot',
           style: TextStyle(color: Colors.white),
         ),
-        centerTitle: true,
+        // centerTitle: true,
         backgroundColor: Get.theme.colorScheme.primary,
+        actions: [
+          IconButton(
+              onPressed: () {
+                imagePickerController.deleteSelectdItems();
+              },
+              icon: const Icon(
+                Icons.delete,
+                color: Colors.white,
+              )),
+           IconButton(
+            onPressed:(){
+            
+            }, icon: const Icon(Icons.more_vert,color: Colors.white,))   
+        ],
       ),
       body: SafeArea(
         child: Container(
@@ -35,7 +50,8 @@ class HomeView extends GetView<HomeController> {
                           const SliverGridDelegateWithFixedCrossAxisCount(
                               crossAxisCount: 2,
                               mainAxisSpacing: 10,
-                              crossAxisSpacing: 10),
+                              crossAxisSpacing: 10
+                              ),
                       itemCount: imagePickerController.imagePaths.length,
                       itemBuilder: ((context, index) {
                         return GestureDetector(
@@ -44,11 +60,16 @@ class HomeView extends GetView<HomeController> {
                           },
                           child: GridTile(
                             // ignore: sort_child_properties_last
-                            child: Image.file(
+                            child:File(imagePickerController.imagePaths[index]).existsSync()?
+                            Image.file(
                                 File(imagePickerController.imagePaths[index]),
-                                fit: BoxFit.cover),
+                                fit: BoxFit.cover)
+                                :Container(
+                                  color: Colors.grey,
+                                   child: const Icon(Icons.broken_image, color: Colors.white),
+                                ),
                             footer: GridTileBar(
-                              backgroundColor: Get.theme.colorScheme.secondary,
+                              // backgroundColor: Get.theme.colorScheme.onPrimaryContainer,
                               leading: Obx(() {
                                 return Icon(
                                   imagePickerController.selectedIndexes
@@ -64,17 +85,17 @@ class HomeView extends GetView<HomeController> {
                       }));
                 }),
               ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: imagePickerController.pickImageFromGallery,
-                child: const Text('Pick Image from Gallery'),
-              ),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: imagePickerController.pickImageFromCamera,
-                child: const Text('Take Photo'),
-              ),
-              const SizedBox(height: 10),
+              // const SizedBox(height: 20),
+              // ElevatedButton(
+              //   onPressed: imagePickerController.pickImageFromGallery,
+              //   child: const Text('Pick Image from Gallery'),
+              // ),
+              // const SizedBox(height: 10),
+              // ElevatedButton(
+              //   onPressed: imagePickerController.pickImageFromCamera,
+              //   child: const Text('Take Photo'),
+              // ),
+              // const SizedBox(height: 10),
               // ElevatedButton(
               //   onPressed: () async {
               //     final pdfFile =
@@ -85,24 +106,47 @@ class HomeView extends GetView<HomeController> {
               //   },
               //   child: const Text('Create PDF from Selected'),
               // ),
-              const SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () async {
-                  await imagePickerController.saveSelectedImagesToHive();
-                },
-                child: const Text('Save Selected to Hive'),
-              ),
+              // const SizedBox(height: 10),
+              // ElevatedButton(
+              //   onPressed: () async {
+              //     await imagePickerController.saveSelectedImagesToHive();
+              //   },
+              //   child: const Text('Save Selected to Hive'),
+              // ),
             ],
           ),
         ),
       ),
-      bottomNavigationBar:
-          BottomNavigationBar(items: const <BottomNavigationBarItem>[
-        BottomNavigationBarItem(
-            icon: Icon(Icons.browse_gallery), label: 'Gallery',),
-        BottomNavigationBarItem(icon: Icon(Icons.camera_alt), label: 'Camera'),
-        BottomNavigationBarItem(icon: Icon(Icons.hive), label: 'Hive'),
-      ]),
+      bottomNavigationBar:Obx((){
+       return BottomNavigationBar(
+        items:const[
+          BottomNavigationBarItem(
+            icon: Icon(Icons.browse_gallery),
+            label: 'Gallery',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.camera_alt),
+            label: 'Camera'),
+          BottomNavigationBarItem(icon: Icon(Icons.hive),
+           label: 'Hive'),
+        ],
+        
+        currentIndex: controller.selectedIndex.value,
+        // selectedItemColor: Get.theme.colorScheme.primary,
+        onTap: (index) async {
+          if (index == 0) {
+            await imagePickerController.pickImageFromGallery();
+          } else if (index == 1) {
+            await imagePickerController.pickImageFromCamera();
+            
+          } else if (index == 2) {
+            await imagePickerController.saveSelectedImagesToHive();
+          }
+        },
+      );
+      })
+      
+      
     );
   }
 }
