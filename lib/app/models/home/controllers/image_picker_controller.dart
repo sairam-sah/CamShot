@@ -63,6 +63,7 @@ class ImagePickerController extends GetxController {
         );
       }));
     }
+    
     try {
       final dir = await getApplicationDocumentsDirectory();
       final file = File('${dir.path}/selected_images.pdf');
