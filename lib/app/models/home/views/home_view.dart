@@ -11,7 +11,6 @@ class HomeView extends GetView<HomeController> {
 
   final ImagePickerController imagePickerController =
       Get.put(ImagePickerController());
-  // final HomeController homeController = Get.put(HomeController());
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +20,6 @@ class HomeView extends GetView<HomeController> {
             'CamShot',
             style: TextStyle(color: Colors.white),
           ),
-          // centerTitle: true,
           backgroundColor: Get.theme.colorScheme.primary,
           actions: [
             IconButton(
@@ -39,7 +37,7 @@ class HomeView extends GetView<HomeController> {
                 ),
                 onSelected: (value) {
                   if (value == 'share') {
-                    // imagePickerController.sharePdf();
+                    imagePickerController.shareSelectedImages();
                   } else if (value == 'flush') {
                     imagePickerController.flushHiveMemory();
                   }
@@ -63,26 +61,56 @@ class HomeView extends GetView<HomeController> {
         body: SafeArea(
           child: Container(
             padding: const EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                Expanded(
-                  child: Obx(() {
-                    return GridView.builder(
-                        gridDelegate:
-                            const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
-                                mainAxisSpacing: 10,
-                                crossAxisSpacing: 10),
-                        itemCount: imagePickerController.imagePaths.length,
-                        itemBuilder: ((context, index) {
-                          return GestureDetector(
-                            onTap: () {
-                              imagePickerController.toggleSelection(index);
-                            },
-                            child: GridTile(
-                              // ignore: sort_child_properties_last
-                              child:
-                                  File(imagePickerController.imagePaths[index])
+            child: Obx(() {
+              if (imagePickerController.enlargedImagePath.value.isNotEmpty) {
+                return Center(
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                      GestureDetector(
+                        onTap: () {
+                          imagePickerController.enlargedImagePath.value = '';
+                        },
+                        child: Image.file(
+                          File(imagePickerController.enlargedImagePath.value),
+                          fit: BoxFit.contain,
+                        ),
+                      ),
+                      const SizedBox(height:10),
+                      ElevatedButton(onPressed: ()async{
+                        await imagePickerController.cropImage();
+                      }, child: const Text('Crop Image')),
+                    ]));
+              } else {
+                return Column(
+                  children: [
+                    Expanded(
+                      child: Obx(() {
+                        return GridView.builder(
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                    crossAxisCount: 2,
+                                    mainAxisSpacing: 10,
+                                    crossAxisSpacing: 10),
+                            itemCount: imagePickerController.imagePaths.length,
+                            itemBuilder: ((context, index) {
+                              final imagePath =
+                                  imagePickerController.imagePaths[index];
+                              final imageDate =
+                                  imagePickerController.imageDates[imagePath] ??
+                                      '';
+                              return GestureDetector(
+                                onTap: () {
+                                  imagePickerController.enlargeImage(
+                                      imagePickerController.imagePaths[index]);
+                                },
+                                onLongPress: () {
+                                  imagePickerController.toggleSelection(index);
+                                },
+                                child: GridTile(
+                                  // ignore: sort_child_properties_last
+                                  child: File(imagePickerController
+                                              .imagePaths[index])
                                           .existsSync()
                                       ? Image.file(
                                           File(imagePickerController
@@ -90,68 +118,47 @@ class HomeView extends GetView<HomeController> {
                                           fit: BoxFit.cover)
                                       : Container(
                                           color: Get.theme.colorScheme.primary,
-                                          child: const Icon(Icons.broken_image,
-                                              color: Colors.white),
+                                          child: Icon(Icons.broken_image,
+                                              color: Get
+                                                  .theme.colorScheme.primary),
                                         ),
-                              footer: GridTileBar(
-                                // backgroundColor: Get.theme.colorScheme.onPrimaryContainer,
-                                leading: Obx(() {
-                                  return Icon(
-                                    imagePickerController.selectedIndexes
-                                            .contains(index)
-                                        ? Icons.check_box
-                                        : Icons.check_box_outline_blank,
-                                    color: Colors.white,
-                                  );
-                                }),
-                              ),
-                            ),
-                          );
-                        }));
-                  }),
-                ),
-                // const SizedBox(height: 20),
-                // ElevatedButton(
-                //   onPressed: imagePickerController.pickImageFromGallery,
-                //   child: const Text('Pick Image from Gallery'),
-                // ),
-                // const SizedBox(height: 10),
-                // ElevatedButton(
-                //   onPressed: imagePickerController.pickImageFromCamera,
-                //   child: const Text('Take Photo'),
-                // ),
-                // const SizedBox(height: 10),
-                // ElevatedButton(
-                //   onPressed: () async {
-                //     final pdfFile =
-                //         await imagePickerController.createPdfFromImages();
-                //     if (pdfFile != null) {
-                //       Get.snackbar('Success', 'PDF created at ${pdfFile.path}');
-                //     }
-                //   },
-                //   child: const Text('Create PDF from Selected'),
-                // ),
-                // const SizedBox(height: 10),
-                // ElevatedButton(
-                //   onPressed: () async {
-                //     await imagePickerController.saveSelectedImagesToHive();
-                //   },
-                //   child: const Text('Save Selected to Hive'),
-                // ),
-              ],
-            ),
+                                  footer: GridTileBar(
+                                    leading: Obx(() {
+                                      return Icon(
+                                        imagePickerController.selectedIndexes
+                                                .contains(index)
+                                            ? Icons.check_box
+                                            : Icons.check_box_outline_blank,
+                                        color: Get.theme.colorScheme.primary,
+                                      );
+                                    }),
+                                    title: Text(
+                                      imageDate,
+                                      style: const TextStyle(
+                                          color: Colors.white, fontSize: 15),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }));
+                      }),
+                    ),
+                  ],
+                );
+              }
+            }),
           ),
         ),
         bottomNavigationBar: Obx(() {
           return BottomNavigationBar(
             items: const [
               BottomNavigationBarItem(
-                icon: Icon(Icons.browse_gallery),
+                icon: Icon(Icons.image),
                 label: 'Gallery',
               ),
               BottomNavigationBarItem(
                   icon: Icon(Icons.camera_alt), label: 'Camera'),
-              BottomNavigationBarItem(icon: Icon(Icons.hive), label: 'Hive'),
+              BottomNavigationBarItem(icon: Icon(Icons.save), label: 'Save'),
             ],
             currentIndex: controller.selectedIndex.value,
             selectedItemColor: Get.theme.colorScheme.primary,
@@ -170,27 +177,3 @@ class HomeView extends GetView<HomeController> {
         }));
   }
 }
-
-
-
-
-// class PdfViewerPage extends StatelessWidget {
-//   final String pdfPath;
-
-//   const PdfViewerPage({Key? key, required this.pdfPath}) : super(key: key);
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: const Text('PDF Viewer'),
-//         backgroundColor: Get.theme.colorScheme.primary,
-//       ),
-//       body: Center(
-//         child: PdfView(
-//           filePath: pdfPath,
-//         ),
-//       ),
-//     );
-//   }
-// }
