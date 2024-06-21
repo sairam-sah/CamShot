@@ -60,6 +60,7 @@ class ImagePickerController extends GetxController {
     }
   }
 
+
   void toggleSelection(int index) {
     if (selectedIndexes.contains(index)) {
       selectedIndexes.remove(index);
