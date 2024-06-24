@@ -94,11 +94,15 @@ class ImagePickerController extends GetxController {
   }
 
   Future<void> saveSelectedImagesToHive() async {
-    final box = await Hive.openBox<String>('selectedImagesBox');
+    if(selectedIndexes.isNotEmpty){
+      final box = await Hive.openBox<String>('selectedImagesBox');
     for (var index in selectedIndexes) {
       await box.add(imagePaths[index]);
     }
-    Get.snackbar('Success', 'Selected images saved to Hive');
+    Get.snackbar('Success', 'Selected images saved ');
+    selectedIndexes.clear();
+    }
+   
   }
 
   Future<void> saveImagePath(String path) async {

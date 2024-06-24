@@ -64,23 +64,25 @@ class HomeView extends GetView<HomeController> {
             child: Obx(() {
               if (imagePickerController.enlargedImagePath.value.isNotEmpty) {
                 return Center(
-                    child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                      GestureDetector(
-                        onTap: () {
-                          imagePickerController.enlargedImagePath.value = '';
-                        },
-                        child: Image.file(
-                          File(imagePickerController.enlargedImagePath.value),
-                          fit: BoxFit.contain,
+                    child: SingleChildScrollView(
+                      child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                        GestureDetector(
+                          onTap: () {
+                            imagePickerController.enlargedImagePath.value = '';
+                          },
+                          child: Image.file(
+                            File(imagePickerController.enlargedImagePath.value),
+                            fit: BoxFit.contain,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height:10),
-                      ElevatedButton(onPressed: ()async{
-                        await imagePickerController.cropImage();
-                      }, child: const Text('Crop Image')),
-                    ]));
+                        const SizedBox(height:10),
+                        ElevatedButton(onPressed: ()async{
+                          await imagePickerController.cropImage();
+                        }, child: const Text('Crop Image')),
+                      ]),
+                    ));
               } else {
                 return Column(
                   children: [
@@ -104,9 +106,9 @@ class HomeView extends GetView<HomeController> {
                                   imagePickerController.enlargeImage(
                                       imagePickerController.imagePaths[index]);
                                 },
-                                onLongPress: () {
-                                  imagePickerController.toggleSelection(index);
-                                },
+                                // onLongPress: () {
+                                //   imagePickerController.toggleSelection(index);
+                                // },
                                 child: GridTile(
                                   // ignore: sort_child_properties_last
                                   child: File(imagePickerController
@@ -122,20 +124,25 @@ class HomeView extends GetView<HomeController> {
                                               color: Get
                                                   .theme.colorScheme.primary),
                                         ),
-                                  footer: GridTileBar(
-                                    leading: Obx(() {
-                                      return Icon(
-                                        imagePickerController.selectedIndexes
-                                                .contains(index)
-                                            ? Icons.check_box
-                                            : Icons.check_box_outline_blank,
-                                        color: Get.theme.colorScheme.primary,
-                                      );
-                                    }),
-                                    title: Text(
-                                      imageDate,
-                                      style: const TextStyle(
-                                          color: Colors.white, fontSize: 15),
+                                  footer: GestureDetector(
+                                    onTap: () {
+                                       imagePickerController.toggleSelection(index);
+                                    },
+                                    child: GridTileBar(
+                                      leading: Obx(() {
+                                        return Icon(
+                                          imagePickerController.selectedIndexes
+                                                  .contains(index)
+                                              ? Icons.check_box
+                                              : Icons.check_box_outline_blank,
+                                          color: Get.theme.colorScheme.primary,
+                                        );
+                                      }),
+                                      title: Text(
+                                        imageDate,
+                                        style: const TextStyle(
+                                            color: Colors.white, fontSize: 15),
+                                      ),
                                     ),
                                   ),
                                 ),
