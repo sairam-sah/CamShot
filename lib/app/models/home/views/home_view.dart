@@ -53,7 +53,7 @@ class HomeView extends GetView<HomeController> {
                           value: 'flush',
                           child: ListTile(
                             leading: Icon(Icons.delete_sweep),
-                            title: Text('Hive flush'),
+                            title: Text('Clear all'),
                           )),
                     ])
           ],
@@ -106,9 +106,6 @@ class HomeView extends GetView<HomeController> {
                                   imagePickerController.enlargeImage(
                                       imagePickerController.imagePaths[index]);
                                 },
-                                // onLongPress: () {
-                                //   imagePickerController.toggleSelection(index);
-                                // },
                                 child: GridTile(
                                   // ignore: sort_child_properties_last
                                   child: File(imagePickerController
@@ -165,7 +162,7 @@ class HomeView extends GetView<HomeController> {
               ),
               BottomNavigationBarItem(
                   icon: Icon(Icons.camera_alt), label: 'Camera'),
-              BottomNavigationBarItem(icon: Icon(Icons.save), label: 'Save'),
+              BottomNavigationBarItem(icon: Icon(Icons.save), label: 'Save to gallery'),
             ],
             currentIndex: controller.selectedIndex.value,
             selectedItemColor: Get.theme.colorScheme.primary,
@@ -177,7 +174,7 @@ class HomeView extends GetView<HomeController> {
               } else if (index == 1) {
                 await imagePickerController.pickImageFromCamera();
               } else if (index == 2) {
-                await imagePickerController.saveSelectedImagesToHive();
+                await imagePickerController.saveSelectedImagesToGallery();
               }
             },
           );
